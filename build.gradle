@@ -1,0 +1,17 @@
+group 'org.bibliarij'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories { mavenCentral() }
+}
+
+apply plugin: 'scala'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.5'
+}
+
