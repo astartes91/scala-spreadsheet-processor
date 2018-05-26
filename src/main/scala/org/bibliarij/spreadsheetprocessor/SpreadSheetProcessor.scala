@@ -3,6 +3,27 @@ package org.bibliarij.spreadsheetprocessor
 object SpreadSheetProcessor {
 
   def process(inputSpreadSheet: SpreadSheet): SpreadSheet = {
-    SpreadSheet(inputSpreadSheet.getInternalMap.map(inputRow => inputRow.map(inputCell => inputCell)))
+    val seq: Seq[Seq[String]] = inputSpreadSheet.getInternalMap
+      .map(
+        inputRow => {
+          inputRow.map(
+            inputCell => {
+              if(inputCell.startsWith("'")){
+                inputCell.replaceFirst("'", "")
+              } else if(inputCell.startsWith("=")) {
+                inputCell
+              } else {
+                try{
+                  inputCell.toLong
+                  inputCell
+                } catch {
+                  case nfe: NumberFormatException => "#Error"
+                }
+              }
+            }
+          )
+        }
+      )
+    SpreadSheet(seq)
   }
 }

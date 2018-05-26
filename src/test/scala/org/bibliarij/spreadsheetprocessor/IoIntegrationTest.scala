@@ -13,7 +13,7 @@ class FileInputReader(name: String) extends InputReader {
 
 object CorrectFileInputReader extends FileInputReader("correct_input.txt")
 
-class IoTest {
+class IoIntegrationTest {
 
   @Test
   def test: Unit = {
