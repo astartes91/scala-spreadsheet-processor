@@ -1,8 +1,8 @@
 package org.bibliarij.spreadsheetprocessor
 
-object Init {
+object Io {
 
-  def init(inputReader: InputReader) = {
+  def start(inputReader: InputReader) = {
     val spreadsheetParametersStr: String = inputReader.readLine()
     val spreadSheetParameters: Array[String] = spreadsheetParametersStr.split("\t")
     require(spreadSheetParameters.length == 2)
@@ -16,5 +16,8 @@ object Init {
         require(cells.length == spreadSheetWeight)
         cells
       }
+
+    val outputSpreadSheet: SpreadSheet = SpreadSheetProcessor.process(SpreadSheet(spreadSheet))
+    println(outputSpreadSheet)
   }
 }

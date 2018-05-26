@@ -13,10 +13,10 @@ class FileInputReader(name: String) extends InputReader {
 
 object CorrectFileInputReader extends FileInputReader("correct_input.txt")
 
-class InitTest {
+class IoTest {
 
   @Test
   def test: Unit = {
-    Init.init(CorrectFileInputReader)
+    Io.start(CorrectFileInputReader)
   }
 }
