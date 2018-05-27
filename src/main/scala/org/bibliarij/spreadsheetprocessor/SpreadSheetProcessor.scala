@@ -6,6 +6,8 @@ import scala.collection.mutable
 
 object SpreadSheetProcessor {
 
+  private val cellReferenceRegex: String = "[A-Za-z][0-9]"
+
   def process(inputSpreadSheet: SpreadSheet): SpreadSheet = {
     val seq: Seq[Seq[String]] = inputSpreadSheet.getInternalMap
       .map(
@@ -57,12 +59,31 @@ object SpreadSheetProcessor {
       while(operands.nonEmpty){
         val nextOperand: String = operands.dequeue()
         val operator: Operator = OperatorFromChar(operators.dequeue())
-        operand = operator(operand.toLong, nextOperand.toLong).toString
+
+        val operandLong: Long =
+          if (operand.matches(cellReferenceRegex)){
+            getCellReferenceValue(operand)
+          } else {
+            operand.toLong
+          }
+
+        val nextOperandLong: Long =
+          if (nextOperand.matches(cellReferenceRegex)){
+            getCellReferenceValue(nextOperand)
+          } else {
+            nextOperand.toLong
+          }
+
+        operand = operator(operandLong, nextOperandLong).toString
       }
       operand
     } catch {
       case nfe: NumberFormatException => "#Error"
     }
+  }
+
+  private def getCellReferenceValue(cellReference: String): Long = {
+    ???
   }
 }
 
