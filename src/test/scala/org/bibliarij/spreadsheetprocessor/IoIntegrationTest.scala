@@ -16,7 +16,7 @@ object CorrectFileInputReader extends FileInputReader("correct_input.txt")
 class IoIntegrationTest {
 
   @Test
-  def test: Unit = {
+  def test(): Unit = {
     Io.start(CorrectFileInputReader)
   }
 }
