@@ -7,6 +7,19 @@ buildscript {
 
 apply plugin: 'scala'
 
+task integrationTest(type: Test)
+integrationTest{
+    setGroup('verification')
+    filter {
+        includeTestsMatching '*IntegrationTest*'
+    }
+    dependsOn = [test]
+}
+
+test {
+    exclude '**/*IntegrationTest*'
+}
+
 repositories {
     mavenCentral()
 }
