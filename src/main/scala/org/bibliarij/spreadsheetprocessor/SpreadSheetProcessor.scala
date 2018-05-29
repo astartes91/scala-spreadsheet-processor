@@ -4,13 +4,19 @@ import org.bibliarij.spreadsheetprocessor.OperatorFromChar.Operator
 
 import scala.collection.mutable
 
-object SpreadSheetProcessor {
+class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
 
   private val cellReferenceRegex: String = "[A-Za-z][0-9]"
-  private val operatorsRegex: String = "\\+|-|\\*|/"
+  private val operatorsRegex: String = """\+|-|\*|/"""
 
-  def process(inputSpreadSheet: SpreadSheet): SpreadSheet = {
-    val seq: Seq[Seq[String]] = inputSpreadSheet.getInternalMap
+  private val outputSeq: Seq[Seq[String]] = Seq.empty
+
+  /**
+    * @should return correct result
+    * @return
+    */
+  def process(): SpreadSheet = {
+    val seq: Seq[Seq[String]] = inputSpreadSheet
       .map(
         inputRow => {
           inputRow.map(
@@ -31,7 +37,7 @@ object SpreadSheetProcessor {
           )
         }
       )
-    SpreadSheet(seq)
+    new SpreadSheet(seq)
   }
 
   private def processExpression(inputCell: String): String = {

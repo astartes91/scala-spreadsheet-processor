@@ -17,7 +17,7 @@ object Io {
         cells
       }
 
-    val outputSpreadSheet: SpreadSheet = SpreadSheetProcessor.process(SpreadSheet(spreadSheet))
+    val outputSpreadSheet: SpreadSheet = new SpreadSheetProcessor(spreadSheet).process()
     println(outputSpreadSheet)
   }
 }
