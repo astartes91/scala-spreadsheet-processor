@@ -25,14 +25,14 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
     new SpreadSheet(outputSeq)
   }
 
-  private def processCell(inputCell: String): String = {
+  private def processCell(inputCell: String, alreadyVisitedCells: Seq[String] = Seq.empty): String = {
 
-    if(inputCell.isEmpty){
+    if(inputCell.isEmpty || inputCell.startsWith("#Error")){
       inputCell
     } else if(inputCell.startsWith("'")){
       inputCell.replaceFirst("'", "")
     } else if(inputCell.startsWith("=")) {
-      processExpression(inputCell)
+      processExpression(inputCell, alreadyVisitedCells)
     } else {
       try {
         inputCell.toLong
@@ -43,7 +43,7 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
     }
   }
 
-  private def processExpression(inputCell: String): String = {
+  private def processExpression(inputCell: String, alreadyVisitedCells: Seq[String]): String = {
 
     val expression: String = inputCell.replaceFirst("=", "")
     val operatorsArray: Array[Char] = expression.toCharArray.filter(_.toString.matches(operatorsRegex))
@@ -54,11 +54,11 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
 
     try {
 
-      var accumulator: Long = getOperandLongValue(operands.dequeue())
+      var accumulator: Long = getOperandLongValue(operands.dequeue(), alreadyVisitedCells)
 
       while(operands.nonEmpty){
         val operator: Operator = getOperator(operators.dequeue())
-        val nextOperandLong: Long = getOperandLongValue(operands.dequeue())
+        val nextOperandLong: Long = getOperandLongValue(operands.dequeue(), alreadyVisitedCells)
 
         accumulator = operator(accumulator, nextOperandLong)
       }
@@ -71,18 +71,30 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
     } catch {
       case nfe: NumberFormatException => "#Error: Incorrect operand value in expression"
       case iobe: IndexOutOfBoundsException => "#Error: Incorrect cell reference"
+      case ise: IllegalStateException => ise.getMessage
     }
   }
 
-  private def getOperandLongValue(operand: String): Long = {
+  private def getOperandLongValue(operand: String, alreadyVisitedCells: Seq[String]): Long = {
 
     if (operand.matches(cellReferenceRegex)) {
+
+      if(alreadyVisitedCells.contains(operand)){
+        throw new IllegalStateException("#Error: Expression loop detected")
+      }
+
+      val newSeq: Seq[String] = alreadyVisitedCells :+ operand
+
       val i: Int = Integer.valueOf(operand(1).toString) - 1
       val j: Int = operand(0).toUpper - 65
       if (outputSeq(i)(j).isEmpty){
-        outputSeq(i)(j) = processCell(inputSpreadSheet(i)(j))
+        outputSeq(i)(j) = processCell(inputSpreadSheet(i)(j), newSeq)
       }
-      outputSeq(i)(j).toLong
+      if(!outputSeq(i)(j).startsWith("#Error")){
+        outputSeq(i)(j).toLong
+      } else {
+        throw new IllegalStateException(outputSeq(i)(j))
+      }
     } else {
       operand.toLong
     }

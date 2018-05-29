@@ -16,7 +16,9 @@ class SpreadSheetProcessorTest {
         Seq("", "4"),
         Seq("=B3", "=2"),
         Seq("=-2", "=-2+2"),
-        Seq("=B1", "=Z0")
+        Seq("=B1", "=Z0"),
+        Seq("=A7", "=B3-B3"),
+        Seq("=B8", "=A8")
       )
       val outputSpreadSheet: SpreadSheet = new SpreadSheetProcessor(inputSeq).process()
       val outputSeq: Seq[Seq[String]] = outputSpreadSheet.getInternalSeq
@@ -43,5 +45,13 @@ class SpreadSheetProcessorTest {
       val row6: Seq[String] = outputSeq(5)
       Assertions.assertThat(row6(0)).isEqualTo("#Error: Incorrect operand value in expression")
       Assertions.assertThat(row6(1)).isEqualTo("#Error: Incorrect cell reference")
+
+      val row7: Seq[String] = outputSeq(6)
+      Assertions.assertThat(row7(0)).isEqualTo("#Error: Expression loop detected")
+      Assertions.assertThat(row7(1)).isEqualTo("0")
+
+      val row8: Seq[String] = outputSeq(7)
+      Assertions.assertThat(row8(0)).isEqualTo("#Error: Expression loop detected")
+      Assertions.assertThat(row8(1)).isEqualTo("#Error: Expression loop detected")
     }
 }
