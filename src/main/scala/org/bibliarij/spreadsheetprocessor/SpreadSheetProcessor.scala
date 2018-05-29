@@ -38,7 +38,7 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
         inputCell.toLong
         inputCell
       } catch {
-        case nfe: NumberFormatException => "#Error"
+        case nfe: NumberFormatException => "#Error: Incorrect cell value"
       }
     }
   }
@@ -47,8 +47,10 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
 
     val expression: String = inputCell.replaceFirst("=", "")
     val operatorsArray: Array[Char] = expression.toCharArray.filter(_.toString.matches(operatorsRegex))
+
+    //assumed only binary operators and correct order of operators and operands
     val operators: mutable.Queue[Char] = mutable.Queue(operatorsArray: _*)
-    val operands: mutable.Queue[String] = mutable.Queue(expression.split(operatorsRegex): _*)
+    val operands: mutable.Queue[String] = mutable.Queue(expression.split(operatorsRegex).filter(_.nonEmpty): _*)
 
     try {
 
@@ -62,12 +64,13 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
       }
 
       if (operators.nonEmpty){
-        "#Error"
+        "#Error: Incorrect expression"
       } else {
         accumulator.toString
       }
     } catch {
-      case nfe: NumberFormatException => "#Error"
+      case nfe: NumberFormatException => "#Error: Incorrect operand value in expression"
+      case iobe: IndexOutOfBoundsException => "#Error: Incorrect cell reference"
     }
   }
 
