@@ -22,11 +22,4 @@ class SpreadSheetProcessorTest {
       Assertions.assertThat(row2(1)).isEqualTo("3")
       Assertions.assertThat(row3(0)).isEqualTo("")
     }
-
-  @Test
-  def processs(): Unit = {
-    val inputSeq: Seq[Seq[String]] = Seq(Seq("1", "2", "=C2"), Seq("1", "2", "3"))
-    val outputSpreadSheet: SpreadSheet = new SpreadSheetProcessor(inputSeq).process()
-    val outputSeq: Seq[Seq[String]] = outputSpreadSheet.getInternalSeq
-  }
 }
