@@ -7,6 +7,7 @@ import scala.collection.mutable
 object SpreadSheetProcessor {
 
   private val cellReferenceRegex: String = "[A-Za-z][0-9]"
+  private val operatorsRegex: String = "\\+|-|\\*|/"
 
   def process(inputSpreadSheet: SpreadSheet): SpreadSheet = {
     val seq: Seq[Seq[String]] = inputSpreadSheet.getInternalMap
@@ -35,25 +36,10 @@ object SpreadSheetProcessor {
 
   private def processExpression(inputCell: String): String = {
     val expression: String = inputCell.replaceFirst("=", "")
-    val operators: mutable.Queue[Character] = mutable.Queue()
-    val operands: mutable.Queue[String] = mutable.Queue()
-    var operand: String = ""
-    expression.foreach(
-      character => {
-        val isOperator: Boolean =
-          character.equals('+') || character.equals('-') || character.equals('/') || character.equals('*')
-        if (isOperator){
-          operators.enqueue(character)
-          operands.enqueue(operand)
-          operand = ""
-        } else {
-          operand += character
-        }
-      }
-    )
-
-    operands.enqueue(operand)
-    operand = operands.dequeue()
+    val operatorsArray: Array[Char] = expression.toCharArray.filter(_.toString.matches(operatorsRegex))
+    val operators: mutable.Queue[Char] = mutable.Queue(operatorsArray: _*)
+    val operands: mutable.Queue[String] = mutable.Queue(expression.split(operatorsRegex): _*)
+    var operand: String = operands.dequeue()
 
     try {
       while(operands.nonEmpty){
@@ -62,14 +48,14 @@ object SpreadSheetProcessor {
 
         val operandLong: Long =
           if (operand.matches(cellReferenceRegex)){
-            getCellReferenceValue(operand)
+            getCellReferenceValue(operand).toLong
           } else {
             operand.toLong
           }
 
         val nextOperandLong: Long =
           if (nextOperand.matches(cellReferenceRegex)){
-            getCellReferenceValue(nextOperand)
+            getCellReferenceValue(nextOperand).toLong
           } else {
             nextOperand.toLong
           }
@@ -82,8 +68,8 @@ object SpreadSheetProcessor {
     }
   }
 
-  private def getCellReferenceValue(cellReference: String): Long = {
-    ???
+  private def getCellReferenceValue(cellReference: String): String = {
+    "#Error"
   }
 }
 
