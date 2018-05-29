@@ -10,7 +10,7 @@ class SpreadSheetProcessorTest {
       */
     @Test
     def process_shouldReturnCorrectResult(): Unit = {
-      val inputSeq: Seq[Seq[String]] = Seq(Seq("1", "'Test"), Seq("Error", "=1+2"), Seq("", ""))
+      val inputSeq: Seq[Seq[String]] = Seq(Seq("1", "'Test"), Seq("Error", "=1+5-2*B3/3"), Seq("", "4"))
       val outputSpreadSheet: SpreadSheet = new SpreadSheetProcessor(inputSeq).process()
       val outputSeq: Seq[Seq[String]] = outputSpreadSheet.getInternalSeq
       val row1: Seq[String] = outputSeq(0)
@@ -19,7 +19,7 @@ class SpreadSheetProcessorTest {
       Assertions.assertThat(row1(0)).isEqualTo("1")
       Assertions.assertThat(row1(1)).isEqualTo("Test")
       Assertions.assertThat(row2(0)).isEqualTo("#Error")
-      Assertions.assertThat(row2(1)).isEqualTo("3")
+      Assertions.assertThat(row2(1)).isEqualTo("5")
       Assertions.assertThat(row3(0)).isEqualTo("")
     }
 }

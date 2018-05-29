@@ -1,8 +1,8 @@
 package org.bibliarij.spreadsheetprocessor
 
-object Io {
+class Io (inputReader: InputReader) {
 
-  def start(inputReader: InputReader): Unit = {
+  def start(): Unit = {
     val spreadsheetParametersStr: String = inputReader.readLine()
     val spreadSheetParameters: Array[String] = spreadsheetParametersStr.split("\t")
     require(spreadSheetParameters.length == 2)

@@ -1,7 +1,5 @@
 package org.bibliarij.spreadsheetprocessor
 
-import org.bibliarij.spreadsheetprocessor.OperatorFromChar.Operator
-
 import scala.collection.mutable
 
 class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
@@ -28,6 +26,7 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
   }
 
   private def processCell(inputCell: String): String = {
+
     if(inputCell.isEmpty){
       inputCell
     } else if(inputCell.startsWith("'")){
@@ -35,7 +34,7 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
     } else if(inputCell.startsWith("=")) {
       processExpression(inputCell)
     } else {
-      try{
+      try {
         inputCell.toLong
         inputCell
       } catch {
@@ -45,65 +44,49 @@ class SpreadSheetProcessor(inputSpreadSheet: Seq[Seq[String]]) {
   }
 
   private def processExpression(inputCell: String): String = {
+
     val expression: String = inputCell.replaceFirst("=", "")
     val operatorsArray: Array[Char] = expression.toCharArray.filter(_.toString.matches(operatorsRegex))
     val operators: mutable.Queue[Char] = mutable.Queue(operatorsArray: _*)
     val operands: mutable.Queue[String] = mutable.Queue(expression.split(operatorsRegex): _*)
 
-    var operand: String = operands.dequeue()
-    if(operands.isEmpty && operators.isEmpty){
-      if (operand.matches(cellReferenceRegex)){
-        return getCellReferenceValue(operand)
-      } else {
-        try {
-          operand.toLong
-          return operand
-        } catch {
-          case nfe: NumberFormatException => return "#Error"
-        }
-      }
-    }
-
     try {
+
+      var accumulator: Long = getOperandLongValue(operands.dequeue())
+
       while(operands.nonEmpty){
-        val nextOperand: String = operands.dequeue()
-        val operator: Operator = OperatorFromChar(operators.dequeue())
+        val operator: Operator = getOperator(operators.dequeue())
+        val nextOperandLong: Long = getOperandLongValue(operands.dequeue())
 
-        val operandLong: Long =
-          if (operand.matches(cellReferenceRegex)){
-            getCellReferenceValue(operand).toLong
-          } else {
-            operand.toLong
-          }
-
-        val nextOperandLong: Long =
-          if (nextOperand.matches(cellReferenceRegex)){
-            getCellReferenceValue(nextOperand).toLong
-          } else {
-            nextOperand.toLong
-          }
-
-        operand = operator(operandLong, nextOperandLong).toString
+        accumulator = operator(accumulator, nextOperandLong)
       }
-      operand
+
+      if (operators.nonEmpty){
+        "#Error"
+      } else {
+        accumulator.toString
+      }
     } catch {
       case nfe: NumberFormatException => "#Error"
     }
   }
 
-  private def getCellReferenceValue(cellReference: String): String = {
-    val i: Int = Integer.valueOf(cellReference(1).toString) - 1
-    val j: Int = cellReference(0).toUpper - 65
-    if (outputSeq(i)(j).isEmpty){
-      outputSeq(i)(j) = processCell(inputSpreadSheet(i)(j))
-    }
-    outputSeq(i)(j)
-  }
-}
+  private def getOperandLongValue(operand: String): Long = {
 
-object OperatorFromChar {
+    if (operand.matches(cellReferenceRegex)) {
+      val i: Int = Integer.valueOf(operand(1).toString) - 1
+      val j: Int = operand(0).toUpper - 65
+      if (outputSeq(i)(j).isEmpty){
+        outputSeq(i)(j) = processCell(inputSpreadSheet(i)(j))
+      }
+      outputSeq(i)(j).toLong
+    } else {
+      operand.toLong
+    }
+  }
+
   type Operator = (Long, Long) => Long
-  def apply(operator: Char): Operator =
+  def getOperator(operator: Char): Operator =
     operator match {
       case '-' => _ - _
       case '+' => _ + _

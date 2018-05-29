@@ -17,6 +17,6 @@ class IoIntegrationTest {
 
   @Test
   def test(): Unit = {
-    Io.start(CorrectFileInputReader)
+    new Io(CorrectFileInputReader).start()
   }
 }
